@@ -8,6 +8,6 @@ def func(mul: float) -> float:
     return mul * mul
 
 
-def make_multiplier(mul: float) -> Callable[[float], float]:
+def make_multiplier(multiplier: float) -> Callable[[float], float]:
     """ return a callable. """
     return func
