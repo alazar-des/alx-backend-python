@@ -103,6 +103,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             'utils.requests.get', side_effect=mocked_requests_get
         )
         cls.get_patcher.start()
+        cls.clnt = GithubOrgClient('google')
 
     @classmethod
     def tearDownClass(cls):
@@ -111,13 +112,10 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     def test_public_repos(self):
         """ test public repos with out licence
         """
-        self.clnt = GithubOrgClient('google')
-        public_list = self.clnt.public_repos()
-        self.assertEqual(public_list, self.expected_repos)
+        self.assertEqual(self.clnt.public_repos(), self.expected_repos)
 
     def test_public_repos_with_license(self):
         """ test public_repos with licence
         """
-        self.clnt_ap = GithubOrgClient('google')
-        self.assertEqual(self.clnt_ap.public_repos(license="apache-2.0"),
+        self.assertEqual(self.clnt.public_repos(license="apache-2.0"),
                          self.apache2_repos)
