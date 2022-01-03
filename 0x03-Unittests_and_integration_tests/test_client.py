@@ -66,3 +66,58 @@ class TestGithubOrgClient(unittest.TestCase):
     def test_has_license(self, repo, license_key, expected):
         has_key = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(has_key, expected)
+
+
+def mocked_requests_get(*args, **kwargs):
+    """mock requests with different url
+    """
+    class MockResponse:
+        """Mock response
+        """
+        def __init__(self, json_data):
+            self.json_data = json_data
+
+        def json(self):
+            return self.json_data
+
+
+    if args[0] == 'https://api.github.com/orgs/google':
+        return MockResponse(fixtures.TEST_PAYLOAD[0][0])
+    if args[0] == fixtures.TEST_PAYLOAD[0][0]["repos_url"]:
+        return MockResponse(fixtures.TEST_PAYLOAD[0][1])
+
+
+@parameterized_class(
+    ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
+                     [(fixtures.TEST_PAYLOAD[0][0],
+                       fixtures.TEST_PAYLOAD[0][1],
+                       fixtures.TEST_PAYLOAD[0][2],
+                       fixtures.TEST_PAYLOAD[0][3])]
+)
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration Test
+    """
+    @classmethod
+    def setUpClass(cls):
+        cls.get_patcher = patch(
+            'utils.requests.get', side_effect=mocked_requests_get
+        )
+        cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """ test public repos with out licence
+        """
+        self.clnt = GithubOrgClient('google')
+        public_list = self.clnt.public_repos()
+        self.assertEqual(public_list, self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """ test public_repos with licence
+        """
+        self.clnt_ap = GithubOrgClient('google')
+        self.assertEqual(self.clnt_ap.public_repos(license="apache-2.0"),
+                         self.apache2_repos)
