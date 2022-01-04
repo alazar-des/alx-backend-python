@@ -64,6 +64,8 @@ class TestGithubOrgClient(unittest.TestCase):
               license_key="my_license", expected=False)
     ])
     def test_has_license(self, repo, license_key, expected):
+        """Test if has_license returns correct output
+        """
         has_key = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(has_key, expected)
 
@@ -78,8 +80,9 @@ def mocked_requests_get(*args, **kwargs):
             self.json_data = json_data
 
         def json(self):
+            """Function for returning json
+            """
             return self.json_data
-
 
     if args[0] == 'https://api.github.com/orgs/google':
         return MockResponse(fixtures.TEST_PAYLOAD[0][0])
@@ -89,24 +92,26 @@ def mocked_requests_get(*args, **kwargs):
 
 @parameterized_class(
     ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
-                     [(fixtures.TEST_PAYLOAD[0][0],
-                       fixtures.TEST_PAYLOAD[0][1],
-                       fixtures.TEST_PAYLOAD[0][2],
-                       fixtures.TEST_PAYLOAD[0][3])]
+    [(fixtures.TEST_PAYLOAD[0][0],
+      fixtures.TEST_PAYLOAD[0][1],
+      fixtures.TEST_PAYLOAD[0][2],
+      fixtures.TEST_PAYLOAD[0][3])]
 )
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Integration Test
+    """Integration Test. mock http request
     """
     @classmethod
     def setUpClass(cls):
         cls.get_patcher = patch(
-            'utils.requests.get', side_effect=mocked_requests_get
+            'requests.get', side_effect=mocked_requests_get
         )
         cls.get_patcher.start()
         cls.clnt = GithubOrgClient('google')
 
     @classmethod
     def tearDownClass(cls):
+        """stop patcher
+        """
         cls.get_patcher.stop()
 
     def test_public_repos(self):
