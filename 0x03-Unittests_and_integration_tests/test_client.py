@@ -101,18 +101,18 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration Test. mock http request
     """
     @classmethod
-    def setUpClass(cls):
-        cls.get_patcher = patch(
+    def setUpClass(self):
+        self.get_patcher = patch(
             'requests.get', side_effect=mocked_requests_get
         )
-        cls.get_patcher.start()
-        cls.clnt = GithubOrgClient('google')
+        self.get_patcher.start()
+        self.clnt = GithubOrgClient('google')
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(self):
         """stop patcher
         """
-        cls.get_patcher.stop()
+        self.get_patcher.stop()
 
     def test_public_repos(self):
         """ test public repos with out licence
